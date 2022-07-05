@@ -1,4 +1,4 @@
-% this script sets up a simulated problem and compares the proposed 
+% this script sets up a simulated problem and compares the proposed
 % method to dead reckoning and optimal trilateration
 
 %% simulation parameters
@@ -8,7 +8,7 @@ rtt_std = 0.1; % meters
 step_relerror = 0.1;
 mean_steps = 5;
 mean_stepstd = 2;
-step_std = mean_steps*step_relerror; % no unit 
+step_std = mean_steps*step_relerror; % no unit
 step_length = 0.75;
 heading_std = 0.005; % radians
 nr_senders = 20;
@@ -59,7 +59,7 @@ headsn = heads+randn(1,nr_tot)*heading_std;
 xxo = zeros(2,nr_tot);
 for iii = 1:nr_tot
     r0 = yy(:,m_ids(:,iii));
-    d = sqrt(dd2n(:,iii))'; 
+    d = sqrt(dd2n(:,iii))';
     xo = solver_opttrilat(r0,d,1./d.^2);
     xxo(:,iii) = xo;
 end
@@ -102,7 +102,7 @@ for iii = 1:nr_segments
     xxer(:,(1:nr_receivers)+(iii-1)*nr_receivers)=xe;
     
 end
-        
+
 %% test proposed sim
 
 bnd = 0.5;
@@ -136,63 +136,131 @@ for iii = 1:nr_segments
     
 end
 
+%% errors 
+e_o = rms(xx(:)-xxo(:));
+e_n = rms(xx(:)-xxn(:));
+e_er = rms(xx(:)-xxer(:));
+e_es = rms(xx(:)-xxes(:));
+
+disp('Distance to ground truth (rms)')
+disp(['Optimal trilateration: ' num2str(e_o) ' m']);
+disp(['Dead reckoning: ' num2str(e_n) ' m']);
+disp(['Proposed Euclidean: ' num2str(e_er) ' m']);
+disp(['Proposed similarity: ' num2str(e_es) ' m']);
+
+
 %% plot results
 
 
-    ms = 10;
-     figure(1);
-    clf
-    ll = plot(yy(1,:),yy(2,:),'x');
-    set(ll,'MarkerSize',ms);
-    set(ll,'LineWidth',2);
-    hold on
-    ll = plot(xx(1,:),xx(2,:),'*');
-    set(ll,'MarkerSize',ms);
-    set(ll,'LineWidth',2);
-    ll = plot(xxer(1,:),xxer(2,:),'o');
-      set(ll,'MarkerSize',ms);
-      set(ll,'LineWidth',2);
-    ll = plot(xxn(1,:),xxn(2,:),'o');
-      set(ll,'MarkerSize',ms);
-      set(ll,'LineWidth',2);
-    ll = plot(xxo(1,:),xxo(2,:),'o');
-      set(ll,'MarkerSize',ms);
-    set(ll,'LineWidth',2);
-    
- for iii = 1:nr_segments    
+ms = 10;
+figure(1);
+clf
+ll = plot(yy(1,:),yy(2,:),'x');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+hold on
+ll = plot(xx(1,:),xx(2,:),'*');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxer(1,:),xxer(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxn(1,:),xxn(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxo(1,:),xxo(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+
+for iii = 1:nr_segments
     ll = plot(xx(1,(1:nr_receivers)+nr_receivers*(iii-1)),xx(2,(1:nr_receivers)+nr_receivers*(iii-1)),'-');
     set(ll,'LineWidth',2);
     set(ll,'color','c');
 end
-   legend({'Senders', 'GT receivers','Estimated receivers (proposed Euclidean)',...
-        'Estimated receivers (dead reckoning)','Estimated receivers (optimal trilateration)'},'Location','northwest');
+legend({'Senders', 'GT receivers','Estimated receivers (proposed Euclidean)',...
+    'Estimated receivers (dead reckoning)','Estimated receivers (optimal trilateration)'},'Location','northwest');
+title('Proposed Euclidean solver comparison');
+
 axis equal
 
 
 figure(2);
-  clf
-  
-  ids = (nr_receivers*(nr_segments-3)+1):(nr_receivers*nr_segments);
-    ll = plot(xx(1,ids),xx(2,ids),'*');
-    set(ll,'MarkerSize',ms);
-    set(ll,'LineWidth',2);
-    hold on
-    ll = plot(xxer(1,ids),xxer(2,ids),'o');
-      set(ll,'MarkerSize',ms);
-      set(ll,'LineWidth',2);
-    ll = plot(xxn(1,ids),xxn(2,ids),'o');
-      set(ll,'MarkerSize',ms);
-      set(ll,'LineWidth',2);
-   % ll = plot(xxo(1,ids),xxo(2,ids),'o');
-   %   set(ll,'MarkerSize',ms);
-   % set(ll,'LineWidth',2);
-    
- for iii = (nr_segments-2):nr_segments    
+clf
+
+ids = (nr_receivers*(nr_segments-3)+1):(nr_receivers*nr_segments);
+ll = plot(xx(1,ids),xx(2,ids),'*');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+hold on
+ll = plot(xxer(1,ids),xxer(2,ids),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxn(1,ids),xxn(2,ids),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+
+for iii = (nr_segments-2):nr_segments
     ll = plot(xx(1,(1:nr_receivers)+nr_receivers*(iii-1)),xx(2,(1:nr_receivers)+nr_receivers*(iii-1)),'-');
     set(ll,'LineWidth',2);
     set(ll,'color','c');
 end
-   legend({'GT receivers','Estimated receivers (proposed Euclidean)',...
-        'Estimated receivers (dead reckoning)'},'Location','northwest');
+legend({'GT receivers','Estimated receivers (proposed Euclidean)',...
+    'Estimated receivers (dead reckoning)'},'Location','northwest');
 axis equal
-title('Close up of last three segments')
+title('Close up of last three segments (Euclidean case)')
+
+
+figure(3);
+clf
+ll = plot(yy(1,:),yy(2,:),'x');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+hold on
+ll = plot(xx(1,:),xx(2,:),'*');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxes(1,:),xxes(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxn(1,:),xxn(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxo(1,:),xxo(2,:),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+
+for iii = 1:nr_segments
+    ll = plot(xx(1,(1:nr_receivers)+nr_receivers*(iii-1)),xx(2,(1:nr_receivers)+nr_receivers*(iii-1)),'-');
+    set(ll,'LineWidth',2);
+    set(ll,'color','c');
+end
+legend({'Senders', 'GT receivers','Estimated receivers (proposed similarity)',...
+    'Estimated receivers (dead reckoning)','Estimated receivers (optimal trilateration)'},'Location','northwest');
+axis equal
+title('Proposed similarity solver comparison');
+
+figure(4);
+clf
+
+ids = (nr_receivers*(nr_segments-3)+1):(nr_receivers*nr_segments);
+ll = plot(xx(1,ids),xx(2,ids),'*');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+hold on
+ll = plot(xxes(1,ids),xxes(2,ids),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+ll = plot(xxn(1,ids),xxn(2,ids),'o');
+set(ll,'MarkerSize',ms);
+set(ll,'LineWidth',2);
+
+for iii = (nr_segments-2):nr_segments
+    ll = plot(xx(1,(1:nr_receivers)+nr_receivers*(iii-1)),xx(2,(1:nr_receivers)+nr_receivers*(iii-1)),'-');
+    set(ll,'LineWidth',2);
+    set(ll,'color','c');
+end
+legend({'GT receivers','Estimated receivers (proposed similarity)',...
+    'Estimated receivers (dead reckoning)'},'Location','northwest');
+axis equal
+title('Close up of last three segments (similarity case)')
+

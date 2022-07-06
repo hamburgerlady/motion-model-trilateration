@@ -11,7 +11,7 @@ outdir = 'solvers/';
 % which solver to compile?
 fname = 'solvers/solver_mini_estrigid_v2.cpp';
 
-mex(['-I"' cg_eigen_dir '"'],['-I"' template_dir '"'],'-outdir',outdir,'-O',fname)
+mex(['-I"' cg_eigen_dir '"'],'-outdir',outdir,'-O',fname)
 
 mex getdata_mini_estrigid.cpp 
 
